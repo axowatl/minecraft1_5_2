@@ -2,6 +2,13 @@ namespace minecraft.util {
 
     public class AxisAlignedBB
     {
+        minX: number;
+        minY: number;
+        minZ: number;
+        maxX: number;
+        maxY: number;
+        maxZ: number;
+
         constructor(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number);
         constructor(pos1: BlockPos, pos2: BlockPos);
         constructor(
@@ -13,7 +20,12 @@ namespace minecraft.util {
             z2?: number
         ) {
             if (x1 instanceof BlockPos && y1 instanceof BlockPos) {
-                // handle two BlockPos objects
+                this.minX = x1.getX();
+                this.minY = x1.getY();
+                this.minZ = x1.getZ();
+                this.maxX = y1.getX();
+                this.maxY = y1.getY();
+                this.maxZ = y1.getZ();
             } else if (
                 typeof x1 === 'number' &&
                 typeof y1 === 'number' &&
@@ -22,67 +34,53 @@ namespace minecraft.util {
                 typeof y2 === 'number' &&
                 typeof z2 === 'number'
             ) {
-                // handle six number arguments
+                this.minX = Math.min(x1, x2);
+                this.minY = Math.min(y1, y2);
+                this.minZ = Math.min(z1, z2);
+                this.maxX = Math.max(x1, x2);
+                this.maxY = Math.max(y1, y2);
+                this.maxZ = Math.max(z1, z2);
             } else {
-                throw new Error('Invalid constructor arguments');
+                throw new Error('Invalid constructor arguments for Axis Aligned Bounding Box');
             }
-        }
-        
-        public AxisAlignedBB(double x1, double y1, double z1, double x2, double y2, double z2)
-        {
-            this.minX = Math.min(x1, x2);
-            this.minY = Math.min(y1, y2);
-            this.minZ = Math.min(z1, z2);
-            this.maxX = Math.max(x1, x2);
-            this.maxY = Math.max(y1, y2);
-            this.maxZ = Math.max(z1, z2);
-        }
-
-        public AxisAlignedBB(BlockPos pos1, BlockPos pos2)
-        {
-            this.minX = (double)pos1.getX();
-            this.minY = (double)pos1.getY();
-            this.minZ = (double)pos1.getZ();
-            this.maxX = (double)pos2.getX();
-            this.maxY = (double)pos2.getY();
-            this.maxZ = (double)pos2.getZ();
         }
 
         /**
-         * Adds the coordinates to the bounding box extending it if the point lies outside the current ranges. Args: x, y, z
+         * Adds the coordinates to the bounding box extending it if the point lies outside the current ranges.
+         * @returns {AxisAlignedBB} A new axis aligned bounding box
          */
-        public AxisAlignedBB addCoord(double x, double y, double z)
+        public addCoord(x: number, y: number, z: number): AxisAlignedBB
         {
-            double d0 = this.minX;
-            double d1 = this.minY;
-            double d2 = this.minZ;
-            double d3 = this.maxX;
-            double d4 = this.maxY;
-            double d5 = this.maxZ;
+            let d0: number = this.minX;
+            let d1: number = this.minY;
+            let d2: number = this.minZ;
+            let d3: number = this.maxX;
+            let d4: number = this.maxY;
+            let d5: number = this.maxZ;
 
-            if (x < 0.0D)
+            if (x < 0.0)
             {
                 d0 += x;
             }
-            else if (x > 0.0D)
+            else if (x > 0.0)
             {
                 d3 += x;
             }
 
-            if (y < 0.0D)
+            if (y < 0.0)
             {
                 d1 += y;
             }
-            else if (y > 0.0D)
+            else if (y > 0.0)
             {
                 d4 += y;
             }
 
-            if (z < 0.0D)
+            if (z < 0.0)
             {
                 d2 += z;
             }
-            else if (z > 0.0D)
+            else if (z > 0.0)
             {
                 d5 += z;
             }
@@ -91,49 +89,50 @@ namespace minecraft.util {
         }
 
         /**
-         * Returns a bounding box expanded by the specified vector (if negative numbers are given it will shrink). Args: x,
-         * y, z
+         * Returns a bounding box expanded by the specified vector (if negative numbers are given it will shrink).
+         * @returns {AxisAlignedBB} A new axis aligned bounding box
          */
-        public AxisAlignedBB expand(double x, double y, double z)
+        public expand(x: number, y: number, z: number): AxisAlignedBB
         {
-            double d0 = this.minX - x;
-            double d1 = this.minY - y;
-            double d2 = this.minZ - z;
-            double d3 = this.maxX + x;
-            double d4 = this.maxY + y;
-            double d5 = this.maxZ + z;
+            let d0: number = this.minX - x;
+            let d1: number = this.minY - y;
+            let d2: number = this.minZ - z;
+            let d3: number = this.maxX + x;
+            let d4: number = this.maxY + y;
+            let d5: number = this.maxZ + z;
             return new AxisAlignedBB(d0, d1, d2, d3, d4, d5);
         }
 
-        public AxisAlignedBB union(AxisAlignedBB other)
+        public union(other: AxisAlignedBB): AxisAlignedBB
         {
-            double d0 = Math.min(this.minX, other.minX);
-            double d1 = Math.min(this.minY, other.minY);
-            double d2 = Math.min(this.minZ, other.minZ);
-            double d3 = Math.max(this.maxX, other.maxX);
-            double d4 = Math.max(this.maxY, other.maxY);
-            double d5 = Math.max(this.maxZ, other.maxZ);
-            return new AxisAlignedBB(d0, d1, d2, d3, d4, d5);
-        }
-
-        /**
-         * returns an AABB with corners x1, y1, z1 and x2, y2, z2
-         */
-        public static AxisAlignedBB fromBounds(double x1, double y1, double z1, double x2, double y2, double z2)
-        {
-            double d0 = Math.min(x1, x2);
-            double d1 = Math.min(y1, y2);
-            double d2 = Math.min(z1, z2);
-            double d3 = Math.max(x1, x2);
-            double d4 = Math.max(y1, y2);
-            double d5 = Math.max(z1, z2);
+            let d0: number = Math.min(this.minX, other.minX);
+            let d1: number = Math.min(this.minY, other.minY);
+            let d2: number = Math.min(this.minZ, other.minZ);
+            let d3: number = Math.max(this.maxX, other.maxX);
+            let d4: number = Math.max(this.maxY, other.maxY);
+            let d5: number = Math.max(this.maxZ, other.maxZ);
             return new AxisAlignedBB(d0, d1, d2, d3, d4, d5);
         }
 
         /**
-         * Offsets the current bounding box by the specified coordinates. Args: x, y, z
+         * @returns {AxisAlignedBB} an AABB with corners x1, y1, z1 and x2, y2, z2
          */
-        public AxisAlignedBB offset(double x, double y, double z)
+        public static fromBounds(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number): AxisAlignedBB
+        {
+            let d0: number = Math.min(x1, x2);
+            let d1: number = Math.min(y1, y2);
+            let d2: number = Math.min(z1, z2);
+            let d3: number = Math.max(x1, x2);
+            let d4: number = Math.max(y1, y2);
+            let d5: number = Math.max(z1, z2);
+            return new AxisAlignedBB(d0, d1, d2, d3, d4, d5);
+        }
+
+        /**
+         * Offsets the current bounding box by the specified coordinates.
+         * @returns {AxisAlignedBB} A new axis aligned bounding box
+         */
+        public offset(x: number, y: number, z: number): AxisAlignedBB
         {
             return new AxisAlignedBB(this.minX + x, this.minY + y, this.minZ + z, this.maxX + x, this.maxY + y, this.maxZ + z);
         }
@@ -143,22 +142,22 @@ namespace minecraft.util {
          * in the X dimension.  return var2 if the bounding boxes do not overlap or if var2 is closer to 0 then the
          * calculated offset.  Otherwise return the calculated offset.
          */
-        public double calculateXOffset(AxisAlignedBB other, double offsetX)
+        public calculateXOffset(other: AxisAlignedBB, offsetX: number): number
         {
             if (other.maxY > this.minY && other.minY < this.maxY && other.maxZ > this.minZ && other.minZ < this.maxZ)
             {
-                if (offsetX > 0.0D && other.maxX <= this.minX)
+                if (offsetX > 0.0 && other.maxX <= this.minX)
                 {
-                    double d1 = this.minX - other.maxX;
+                    let d1: number = this.minX - other.maxX;
 
                     if (d1 < offsetX)
                     {
                         offsetX = d1;
                     }
                 }
-                else if (offsetX < 0.0D && other.minX >= this.maxX)
+                else if (offsetX < 0.0 && other.minX >= this.maxX)
                 {
-                    double d0 = this.maxX - other.minX;
+                    let d0: number = this.maxX - other.minX;
 
                     if (d0 > offsetX)
                     {
@@ -179,22 +178,22 @@ namespace minecraft.util {
          * in the Y dimension.  return var2 if the bounding boxes do not overlap or if var2 is closer to 0 then the
          * calculated offset.  Otherwise return the calculated offset.
          */
-        public double calculateYOffset(AxisAlignedBB other, double offsetY)
+        public calculateYOffset(other: AxisAlignedBB, offsetY: number): number
         {
             if (other.maxX > this.minX && other.minX < this.maxX && other.maxZ > this.minZ && other.minZ < this.maxZ)
             {
-                if (offsetY > 0.0D && other.maxY <= this.minY)
+                if (offsetY > 0.0 && other.maxY <= this.minY)
                 {
-                    double d1 = this.minY - other.maxY;
+                    let d1: number = this.minY - other.maxY;
 
                     if (d1 < offsetY)
                     {
                         offsetY = d1;
                     }
                 }
-                else if (offsetY < 0.0D && other.minY >= this.maxY)
+                else if (offsetY < 0.0 && other.minY >= this.maxY)
                 {
-                    double d0 = this.maxY - other.minY;
+                    let d0: number = this.maxY - other.minY;
 
                     if (d0 > offsetY)
                     {
@@ -215,22 +214,22 @@ namespace minecraft.util {
          * in the Z dimension.  return var2 if the bounding boxes do not overlap or if var2 is closer to 0 then the
          * calculated offset.  Otherwise return the calculated offset.
          */
-        public double calculateZOffset(AxisAlignedBB other, double offsetZ)
+        public calculateZOffset(other: AxisAlignedBB, offsetZ: number): number
         {
             if (other.maxX > this.minX && other.minX < this.maxX && other.maxY > this.minY && other.minY < this.maxY)
             {
-                if (offsetZ > 0.0D && other.maxZ <= this.minZ)
+                if (offsetZ > 0.0 && other.maxZ <= this.minZ)
                 {
-                    double d1 = this.minZ - other.maxZ;
+                    let d1: number = this.minZ - other.maxZ;
 
                     if (d1 < offsetZ)
                     {
                         offsetZ = d1;
                     }
                 }
-                else if (offsetZ < 0.0D && other.minZ >= this.maxZ)
+                else if (offsetZ < 0.0 && other.minZ >= this.maxZ)
                 {
-                    double d0 = this.maxZ - other.minZ;
+                    let d0: number = this.maxZ - other.minZ;
 
                     if (d0 > offsetZ)
                     {
@@ -247,9 +246,9 @@ namespace minecraft.util {
         }
 
         /**
-         * Returns whether the given bounding box intersects with this one. Args: axisAlignedBB
+         * Returns whether the given bounding box intersects with this one.
          */
-        public boolean intersectsWith(AxisAlignedBB other)
+        public intersectsWith(other: AxisAlignedBB): boolean
         {
             return other.maxX > this.minX && other.minX < this.maxX ? (other.maxY > this.minY && other.minY < this.maxY ? other.maxZ > this.minZ && other.minZ < this.maxZ : false) : false;
         }
@@ -257,7 +256,7 @@ namespace minecraft.util {
         /**
          * Returns if the supplied Vec3D is completely inside the bounding box
          */
-        public boolean isVecInside(Vec3 vec)
+        public isVecInside(vec: Vec3): boolean
         {
             return vec.xCoord > this.minX && vec.xCoord < this.maxX ? (vec.yCoord > this.minY && vec.yCoord < this.maxY ? vec.zCoord > this.minZ && vec.zCoord < this.maxZ : false) : false;
         }
@@ -265,36 +264,36 @@ namespace minecraft.util {
         /**
          * Returns the average length of the edges of the bounding box.
          */
-        public double getAverageEdgeLength()
+        public getAverageEdgeLength(): number
         {
-            double d0 = this.maxX - this.minX;
-            double d1 = this.maxY - this.minY;
-            double d2 = this.maxZ - this.minZ;
-            return (d0 + d1 + d2) / 3.0D;
+            let d0: number = this.maxX - this.minX;
+            let d1: number = this.maxY - this.minY;
+            let d2: number = this.maxZ - this.minZ;
+            return (d0 + d1 + d2) / 3.0;
         }
 
         /**
          * Returns a bounding box that is inset by the specified amounts
          */
-        public AxisAlignedBB contract(double x, double y, double z)
+        public contract(x: number, y: number, z: number): AxisAlignedBB
         {
-            double d0 = this.minX + x;
-            double d1 = this.minY + y;
-            double d2 = this.minZ + z;
-            double d3 = this.maxX - x;
-            double d4 = this.maxY - y;
-            double d5 = this.maxZ - z;
+            let d0: number = this.minX + x;
+            let d1: number = this.minY + y;
+            let d2: number = this.minZ + z;
+            let d3: number = this.maxX - x;
+            let d4: number = this.maxY - y;
+            let d5: number = this.maxZ - z;
             return new AxisAlignedBB(d0, d1, d2, d3, d4, d5);
         }
 
-        public MovingObjectPosition calculateIntercept(Vec3 vecA, Vec3 vecB)
+        public calculateIntercept(vecA: Vec3, vecB: Vec3): MovingObjectPosition
         {
-            Vec3 vec3 = vecA.getIntermediateWithXValue(vecB, this.minX);
-            Vec3 vec31 = vecA.getIntermediateWithXValue(vecB, this.maxX);
-            Vec3 vec32 = vecA.getIntermediateWithYValue(vecB, this.minY);
-            Vec3 vec33 = vecA.getIntermediateWithYValue(vecB, this.maxY);
-            Vec3 vec34 = vecA.getIntermediateWithZValue(vecB, this.minZ);
-            Vec3 vec35 = vecA.getIntermediateWithZValue(vecB, this.maxZ);
+            let vec3: Vec3 = vecA.getIntermediateWithXValue(vecB, this.minX);
+            let vec31: Vec3 = vecA.getIntermediateWithXValue(vecB, this.maxX);
+            let vec32: Vec3 = vecA.getIntermediateWithYValue(vecB, this.minY);
+            let vec33: Vec3 = vecA.getIntermediateWithYValue(vecB, this.maxY);
+            let vec34: Vec3 = vecA.getIntermediateWithZValue(vecB, this.minZ);
+            let vec35: Vec3 = vecA.getIntermediateWithZValue(vecB, this.maxZ);
 
             if (!this.isVecInYZ(vec3))
             {
@@ -326,7 +325,7 @@ namespace minecraft.util {
                 vec35 = null;
             }
 
-            Vec3 vec36 = null;
+            let vec36: Vec3 = null;
 
             if (vec3 != null)
             {
@@ -364,7 +363,7 @@ namespace minecraft.util {
             }
             else
             {
-                EnumFacing enumfacing = null;
+                let enumfacing: EnumFacing = null;
 
                 if (vec36 == vec3)
                 {
@@ -398,7 +397,7 @@ namespace minecraft.util {
         /**
          * Checks if the specified vector is within the YZ dimensions of the bounding box. Args: Vec3D
          */
-        private boolean isVecInYZ(Vec3 vec)
+        private isVecInYZ(vec: Vec3): boolean
         {
             return vec == null ? false : vec.yCoord >= this.minY && vec.yCoord <= this.maxY && vec.zCoord >= this.minZ && vec.zCoord <= this.maxZ;
         }
@@ -406,7 +405,7 @@ namespace minecraft.util {
         /**
          * Checks if the specified vector is within the XZ dimensions of the bounding box. Args: Vec3D
          */
-        private boolean isVecInXZ(Vec3 vec)
+        private isVecInXZ(vec: Vec3): boolean
         {
             return vec == null ? false : vec.xCoord >= this.minX && vec.xCoord <= this.maxX && vec.zCoord >= this.minZ && vec.zCoord <= this.maxZ;
         }
@@ -414,19 +413,19 @@ namespace minecraft.util {
         /**
          * Checks if the specified vector is within the XY dimensions of the bounding box. Args: Vec3D
          */
-        private boolean isVecInXY(Vec3 vec)
+        private isVecInXY(vec: vec3): boolean
         {
             return vec == null ? false : vec.xCoord >= this.minX && vec.xCoord <= this.maxX && vec.yCoord >= this.minY && vec.yCoord <= this.maxY;
         }
 
-        public String toString()
+        public toString(): string
         {
-            return "box[" + this.minX + ", " + this.minY + ", " + this.minZ + " -> " + this.maxX + ", " + this.maxY + ", " + this.maxZ + "]";
+            return `box[${this.minX}, ${this.minY}, ${this.minZ} -> ${this.maxX}, ${this.maxY}, ${this.maxZ}]`;
         }
 
-        public boolean hasNaN()
+        public hasNaN(): boolean
         {
-            return Double.isNaN(this.minX) || Double.isNaN(this.minY) || Double.isNaN(this.minZ) || Double.isNaN(this.maxX) || Double.isNaN(this.maxY) || Double.isNaN(this.maxZ);
+            return Number.isNaN(this.minX) || Number.isNaN(this.minY) || Number.isNaN(this.minZ) || Number.isNaN(this.maxX) || Number.isNaN(this.maxY) || Number.isNaN(this.maxZ);
         }
     }
 }
